@@ -1,0 +1,33 @@
+---
+- name: Adding the Galera Repository to All Servers
+  hosts: host-group
+  remote_user: ubuntu
+  become: true
+  tasks:
+
+    - apt_key: keyserver=keyserver.ubuntu.com id=44B7345738EBDE52594DAD80D669017EBC19DDBA state=present          
+    - apt_repository: repo='deb [arch=amd64,i386] http://releases.galeracluster.com/ubuntu/ xenial main'
+    - apt: update_cache=yes
+    - apt: name={{item}} state=installed
+      with_items:
+        - galera-3
+        - galera-arbitrator-3 
+        - mysql-wsrep-5.6
+        - rsync
+    - copy: src=/root/galera-cluster/galera.cnf dest=/etc/mysql/conf.d/ mode=0644
+    - copy: src=/root/galera-cluster/my.cnf dest=/etc/mysql/ mode=0644
+    - ufw:
+        rule: allow
+        proto: tcp
+        port: '{{ item }}'
+      with_items:
+        - 3306
+        - 4567
+        - 4568
+        - 444
+    - ufw:
+        rule: allow
+        proto: udp
+        port: 4567
+    - ufw:
+       state: enabled

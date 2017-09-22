@@ -1,0 +1,2 @@
+[host-group]
+node1 ansible_ssh_user=ubuntu ansible_sudo_pass=Qd-14032001
